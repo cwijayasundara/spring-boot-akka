@@ -8,11 +8,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
-
 import static akka.pattern.Patterns.ask;
 
 @SpringBootApplication
@@ -27,13 +26,12 @@ public class AkkaSpringBootApplication implements CommandLineRunner {
 
 	}
 
-	public void run(java.lang.String... args){
-		ActorRef tweeter = system.actorOf(SpringExtension.SPRING_EXTENSION.get(system).props("tweetActor"), "greeter");
+	public void run(java.lang.String... args) throws Exception{
+		ActorRef tweeter = system.actorOf(SpringExtension.SPRING_EXTENSION.get(system).props("tweetActor"), "tweetActor");
 		FiniteDuration duration = FiniteDuration.create(1, TimeUnit.SECONDS);
 		Timeout timeout = Timeout.durationToTimeout(duration);
 		Future<Object> result = ask(tweeter, new TweetActor.Tweet("Scala-Akka-Spring-Boot"), timeout);
-		System.out.println(result.value());
+		System.out.println(Await.result(result, duration).toString());
 	}
-
 }
 
